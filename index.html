@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <title>Liberação de Prova | UFF</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+
+  <style>
+    :root {
+      --uff-blue: #003A8F;
+      --uff-light: #E6EEF8;
+      --text-dark: #333333;
+      --white: #FFFFFF;
+    }
+
+    * {
+      box-sizing: border-box;
+      font-family: "Segoe UI", Roboto, Arial, sans-serif;
+    }
+
+    body {
+      margin: 0;
+      background: linear-gradient(135deg, var(--uff-blue), #001f4d);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .container {
+      background: var(--white);
+      width: 100%;
+      max-width: 520px;
+      padding: 32px;
+      border-radius: 12px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 24px;
+    }
+
+    .header h1 {
+      color: var(--uff-blue);
+      margin-bottom: 6px;
+      font-size: 1.6rem;
+    }
+
+    .header p {
+      color: var(--text-dark);
+      font-size: 0.95rem;
+    }
+
+    label {
+      display: block;
+      margin-top: 14px;
+      font-weight: 600;
+      color: var(--text-dark);
+      font-size: 0.9rem;
+    }
+
+    input {
+      width: 100%;
+      padding: 10px 12px;
+      margin-top: 6px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      font-size: 0.95rem;
+    }
+
+    input:focus {
+      outline: none;
+      border-color: var(--uff-blue);
+      box-shadow: 0 0 0 2px rgba(0,58,143,0.15);
+    }
+
+    button {
+      margin-top: 24px;
+      width: 100%;
+      padding: 12px;
+      background: var(--uff-blue);
+      color: var(--white);
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s ease;
+    }
+
+    button:hover {
+      background: #002b6b;
+    }
+
+    .footer {
+      margin-top: 18px;
+      text-align: center;
+      font-size: 0.8rem;
+      color: #666;
+    }
+
+    .status {
+      margin-top: 16px;
+      text-align: center;
+      font-size: 0.9rem;
+      font-weight: 600;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="container">
+    <div class="header">
+      <h1>Liberação de Prova</h1>
+      <p>Universidade Federal Fluminense</p>
+    </div>
+
+    <form id="liberarProvaForm">
+
+      <label>Nome do professor</label>
+      <input type="text" name="nome" required />
+
+      <label>Email institucional</label>
+      <input type="email" name="email" placeholder="nome@id.uff.br" required />
+
+      <label>Matrícula</label>
+      <input type="number" name="matricula" required />
+
+      <label>ID da prova</label>
+      <input type="text" name="prova_id" required />
+
+      <label>Hash da prova</label>
+      <input type="text" name="hash_prova" required />
+
+      <label>Duração da prova (minutos)</label>
+      <input type="number" name="duracao_min" required />
+
+      <button type="submit">Liberar prova</button>
+    </form>
+
+    <div id="status" class="status"></div>
+
+    <div class="footer">
+      Sistema acadêmico – UFF
+    </div>
+  </div>
+
+  <script>
+    const form = document.getElementById("liberarProvaForm");
+    const statusDiv = document.getElementById("status");
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      statusDiv.textContent = "Enviando solicitação...";
+
+      const formData = new FormData(form);
+      const payload = Object.fromEntries(formData.entries());
+
+      try {
+        const response = await fetch("https://SEU_WEBHOOK_N8N_AQUI", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify(payload)
+        });
+
+        if (!response.ok) throw new Error("Erro na liberação");
+
+        const result = await response.json();
+        statusDiv.style.color = "green";
+        statusDiv.textContent = result.mensagem || "Prova liberada com sucesso.";
+
+      } catch (err) {
+        statusDiv.style.color = "red";
+        statusDiv.textContent = "Erro ao liberar a prova. Verifique os dados.";
+      }
+    });
+  </script>
+
+</body>
+</html>
