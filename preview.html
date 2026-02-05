@@ -92,7 +92,6 @@
     }
 
     /* ===== BADGE STATUS ===== */
-
     .status-badge {
       display: inline-flex;
       align-items: center;
@@ -145,9 +144,17 @@
     if (!contextoRaw) {
       alert("Sessão inválida. Retorne à ativação da prova.");
       window.location.href = "index.html";
+      throw new Error("Contexto ausente no sessionStorage");
     }
 
-    const contexto = JSON.parse(contextoRaw);
+    let contexto;
+    try {
+      contexto = JSON.parse(contextoRaw);
+    } catch (e) {
+      alert("Erro ao recuperar dados da prova.");
+      console.error("Contexto inválido:", contextoRaw);
+      throw e;
+    }
 
     // ===== 2. Validação local obrigatória =====
     if (contexto.status !== "ATIVADA") {
@@ -162,10 +169,10 @@
     document.getElementById("info").innerHTML = `
       <strong>ID da prova:</strong> ${contexto.prova_id}<br>
       <strong>Status:</strong> ${contexto.status}<br>
-      <strong>Ativada por:</strong> ${contexto.ativada_por}
+      <strong>Ativada por:</strong> ${contexto.ativada_por || "-"}
     `;
 
-    // ===== 4. Botão de preview (GET) =====
+    // ===== 4. Botão de preview =====
     document.getElementById("btnPreview").addEventListener("click", carregarPreview);
 
     async function carregarPreview() {
@@ -173,13 +180,12 @@
       btn.disabled = true;
       btn.innerText = "Carregando prova...";
 
-      try {
-        const url =
-          "https://webhook.artideia.com.br/webhook/preview_prova" +
-          "?prova_id=" + encodeURIComponent(contexto.prova_id) +
-          "&status=" + encodeURIComponent(contexto.status);
+      const url = `https://webhook.artideia.com.br/webhook/preview_prova?prova_id=${encodeURIComponent(
+        contexto.prova_id
+      )}&status=${encodeURIComponent(contexto.status)}`;
 
-        const res = await fetch(url);
+      try {
+        const res = await fetch(url, { method: "GET" });
 
         if (!res.ok) {
           throw new Error("Erro ao buscar a prova");
