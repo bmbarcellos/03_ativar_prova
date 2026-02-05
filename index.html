@@ -23,7 +23,7 @@
       width: 100%;
       max-width: 380px;
       box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-      border-top: 6px solid #003366; /* Azul UFF */
+      border-top: 6px solid #003366;
     }
 
     h2 {
@@ -120,15 +120,27 @@
         prova_id: document.getElementById("prova_id").value
       };
 
-      await fetch("https://webhook.artideia.com.br/webhook/libera_prova", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify(payload)
-      });
+      try {
+        const response = await fetch("https://webhook.artideia.com.br/webhook/libera_prova", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify(payload)
+        });
 
-      alert("Solicitação com sucesso!");
+        const data = await response.json();
+
+        // Salva retorno do workflow 3 no storage
+        localStorage.setItem("ativacao_prova", JSON.stringify(data));
+
+        // Redireciona automaticamente para a página 2
+        window.location.href = "preview.html";
+
+      } catch (err) {
+        alert("Erro ao ativar a prova.");
+        console.error(err);
+      }
     });
   </script>
 
