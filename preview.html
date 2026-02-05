@@ -91,39 +91,39 @@
   </div>
 
   <script>
-    // ===============================
-    // 1. Recupera sessão salva
-    // ===============================
     const raw = localStorage.getItem("prova_ativada");
 
+    // ===============================
+    // 1. Sessão inexistente → saída limpa
+    // ===============================
     if (!raw) {
       document.getElementById("mensagemErro").innerText =
         "Sessão inválida ou expirada. Retorne à ativação da prova.";
       document.getElementById("btnPreview").disabled = true;
-      throw new Error("Sessão não encontrada no localStorage");
+      return;
     }
 
     let dados;
     try {
       dados = JSON.parse(raw);
-    } catch (e) {
+    } catch {
       document.getElementById("mensagemErro").innerText =
         "Erro ao ler os dados da sessão da prova.";
       document.getElementById("btnPreview").disabled = true;
-      throw e;
+      return;
     }
 
     if (!Array.isArray(dados) || !dados[0]) {
       document.getElementById("mensagemErro").innerText =
         "Formato inválido dos dados da prova.";
       document.getElementById("btnPreview").disabled = true;
-      throw new Error("Formato inesperado");
+      return;
     }
 
     const prova = dados[0];
 
     // ===============================
-    // 2. Renderiza informações básicas
+    // 2. Renderização
     // ===============================
     document.getElementById("provaId").innerText = prova.prova_id || "—";
     document.getElementById("ativadaPor").innerText = prova.ativada_por || "—";
@@ -139,10 +139,11 @@
       document.getElementById("btnPreview").disabled = true;
       document.getElementById("mensagemErro").innerText =
         "Apenas provas com status ATIVADA podem ser visualizadas.";
+      return;
     }
 
     // ===============================
-    // 3. Botão de preview (GET)
+    // 3. Preview (GET)
     // ===============================
     document.getElementById("btnPreview").addEventListener("click", async () => {
       document.getElementById("resultadoPreview").innerText = "Carregando prova...";
@@ -155,12 +156,7 @@
         const response = await fetch(url);
         const text = await response.text();
 
-        let json;
-        try {
-          json = JSON.parse(text);
-        } catch {
-          throw new Error("Resposta do webhook não é JSON válido");
-        }
+        const json = JSON.parse(text);
 
         document.getElementById("resultadoPreview").innerText =
           JSON.stringify(json, null, 2);
