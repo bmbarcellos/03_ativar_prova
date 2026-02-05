@@ -90,6 +90,34 @@
       color: #b00020;
       font-weight: bold;
     }
+
+    /* ===== BADGE STATUS ===== */
+
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 12px;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      font-weight: bold;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+
+    .status-ativada {
+      background-color: #e6f4ea;
+      color: #1e7f3d;
+      border: 1px solid #b7e1c0;
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      background-color: #1e7f3d;
+      border-radius: 50%;
+    }
   </style>
 </head>
 
@@ -97,6 +125,12 @@
 
   <div class="container">
     <h2>Preview da Prova</h2>
+
+    <!-- Badge visual de status -->
+    <div id="statusBadge" class="status-badge status-ativada">
+      <span class="status-dot"></span>
+      ATIVADA
+    </div>
 
     <div id="info" class="info"></div>
 
@@ -121,6 +155,7 @@
       document.getElementById("info").innerHTML =
         "<span class='erro'>Preview indisponível. A prova não está no status ATIVADA.</span>";
       document.getElementById("btnPreview").disabled = true;
+      document.getElementById("statusBadge").style.display = "none";
       throw new Error("Status inválido para preview");
     }
 
