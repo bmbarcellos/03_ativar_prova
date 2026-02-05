@@ -132,7 +132,7 @@
         const data = await response.json();
 
         // Salva retorno do workflow 3 no storage
-        localStorage.setItem("ativacao_prova", JSON.stringify(data));
+        sessionStorage.setItem("prova_contexto", JSON.stringify(data[0]));
 
         // Redireciona automaticamente para a página 2
         window.location.href = "preview.html";
