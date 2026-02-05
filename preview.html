@@ -72,6 +72,7 @@
     }
   </style>
 </head>
+
 <body>
 
   <div class="card">
@@ -91,40 +92,27 @@
   </div>
 
   <script>
-    const raw = localStorage.getItem("prova_ativada");
+    // ===== 1. Recupera contexto salvo pela página 1 =====
+    const raw = sessionStorage.getItem("prova_contexto");
 
-    // ===============================
-    // 1. Sessão inexistente → saída limpa
-    // ===============================
     if (!raw) {
       document.getElementById("mensagemErro").innerText =
         "Sessão inválida ou expirada. Retorne à ativação da prova.";
       document.getElementById("btnPreview").disabled = true;
-      return;
+      throw new Error("Contexto não encontrado");
     }
 
-    let dados;
+    let prova;
     try {
-      dados = JSON.parse(raw);
+      prova = JSON.parse(raw);
     } catch {
       document.getElementById("mensagemErro").innerText =
-        "Erro ao ler os dados da sessão da prova.";
+        "Erro ao ler os dados da prova.";
       document.getElementById("btnPreview").disabled = true;
-      return;
+      throw new Error("JSON inválido");
     }
 
-    if (!Array.isArray(dados) || !dados[0]) {
-      document.getElementById("mensagemErro").innerText =
-        "Formato inválido dos dados da prova.";
-      document.getElementById("btnPreview").disabled = true;
-      return;
-    }
-
-    const prova = dados[0];
-
-    // ===============================
-    // 2. Renderização
-    // ===============================
+    // ===== 2. Renderização básica =====
     document.getElementById("provaId").innerText = prova.prova_id || "—";
     document.getElementById("ativadaPor").innerText = prova.ativada_por || "—";
 
@@ -134,19 +122,16 @@
       badge.innerText = "ATIVADA";
       badge.className = "badge badge-ativada";
     } else {
-      badge.innerText = prova.status || "DESCONHECIDO";
-      badge.className = "badge";
-      document.getElementById("btnPreview").disabled = true;
       document.getElementById("mensagemErro").innerText =
         "Apenas provas com status ATIVADA podem ser visualizadas.";
-      return;
+      document.getElementById("btnPreview").disabled = true;
+      throw new Error("Status inválido");
     }
 
-    // ===============================
-    // 3. Preview (GET)
-    // ===============================
+    // ===== 3. Disparo do preview (GET) =====
     document.getElementById("btnPreview").addEventListener("click", async () => {
-      document.getElementById("resultadoPreview").innerText = "Carregando prova...";
+      document.getElementById("resultadoPreview").innerText =
+        "Carregando prova...";
 
       try {
         const url =
@@ -154,9 +139,7 @@
           "?prova_id=" + encodeURIComponent(prova.prova_id);
 
         const response = await fetch(url);
-        const text = await response.text();
-
-        const json = JSON.parse(text);
+        const json = await response.json();
 
         document.getElementById("resultadoPreview").innerText =
           JSON.stringify(json, null, 2);
@@ -164,7 +147,7 @@
       } catch (err) {
         document.getElementById("resultadoPreview").innerText = "";
         document.getElementById("mensagemErro").innerText =
-          "Erro ao carregar a prova para preview.";
+          "Erro ao carregar o preview da prova.";
         console.error(err);
       }
     });
