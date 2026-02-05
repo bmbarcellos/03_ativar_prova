@@ -92,6 +92,7 @@
     }
 
     /* ===== BADGE STATUS ===== */
+
     .status-badge {
       display: inline-flex;
       align-items: center;
@@ -125,6 +126,7 @@
   <div class="container">
     <h2>Preview da Prova</h2>
 
+    <!-- Badge visual de status -->
     <div id="statusBadge" class="status-badge status-ativada">
       <span class="status-dot"></span>
       ATIVADA
@@ -141,18 +143,18 @@
     // ===== 1. Recupera contexto salvo pela página 1 =====
     const contextoRaw = sessionStorage.getItem("prova_contexto");
 
-    if (!contextoRaw) {
-      alert("Sessão inválida. Retorne à ativação da prova.");
+    if (!contextoRaw || contextoRaw === "undefined") {
+      alert("Sessão inválida ou expirada. Retorne à ativação da prova.");
       window.location.href = "index.html";
-      throw new Error("Contexto ausente no sessionStorage");
+      throw new Error("Contexto inválido");
     }
 
     let contexto;
     try {
       contexto = JSON.parse(contextoRaw);
     } catch (e) {
-      alert("Erro ao recuperar dados da prova.");
-      console.error("Contexto inválido:", contextoRaw);
+      alert("Erro ao carregar contexto da prova. Retorne à ativação.");
+      window.location.href = "index.html";
       throw e;
     }
 
@@ -169,7 +171,7 @@
     document.getElementById("info").innerHTML = `
       <strong>ID da prova:</strong> ${contexto.prova_id}<br>
       <strong>Status:</strong> ${contexto.status}<br>
-      <strong>Ativada por:</strong> ${contexto.ativada_por || "-"}
+      <strong>Ativada por:</strong> ${contexto.ativada_por}
     `;
 
     // ===== 4. Botão de preview =====
@@ -180,12 +182,12 @@
       btn.disabled = true;
       btn.innerText = "Carregando prova...";
 
-      const url = `https://webhook.artideia.com.br/webhook/preview_prova?prova_id=${encodeURIComponent(
-        contexto.prova_id
-      )}&status=${encodeURIComponent(contexto.status)}`;
-
       try {
-        const res = await fetch(url, { method: "GET" });
+        const url =
+          "https://webhook.artideia.com.br/webhook/preview_prova" +
+          "?prova_id=" + encodeURIComponent(contexto.prova_id);
+
+        const res = await fetch(url);
 
         if (!res.ok) {
           throw new Error("Erro ao buscar a prova");
@@ -204,6 +206,12 @@
     function renderizarProva(data) {
       const container = document.getElementById("prova");
       container.innerHTML = "";
+
+      if (!data.questoes || !Array.isArray(data.questoes)) {
+        container.innerHTML =
+          "<span class='erro'>Formato inválido de prova retornado.</span>";
+        return;
+      }
 
       data.questoes.forEach((q, index) => {
         const div = document.createElement("div");
