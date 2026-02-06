@@ -131,6 +131,11 @@
 
         const data = await response.json();
 
+        if (data[0]?.erro) {
+          alert(data[0].erro);
+          return;
+        }
+
         // Salva retorno do workflow 3 no storage
         sessionStorage.setItem("prova_contexto", JSON.stringify(data[0]));
 
