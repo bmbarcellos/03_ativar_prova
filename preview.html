@@ -62,34 +62,36 @@
       margin-top: 12px;
     }
 
+    .meta {
+      background: #f9fafb;
+      padding: 12px;
+      border-radius: 6px;
+      margin-bottom: 16px;
+      font-size: 14px;
+    }
+
+    .meta p {
+      margin: 4px 0;
+    }
+
     .questao {
       margin-top: 24px;
       padding-top: 16px;
       border-top: 1px solid #e5e7eb;
     }
 
-    .questao h3 {
-      font-size: 16px;
-      margin-bottom: 8px;
-    }
-
-    .alternativas li,
-    .pares li {
-      margin: 6px 0;
+    .resposta {
+      margin-top: 10px;
+      padding: 8px;
+      background: #f3f4f6;
+      border-left: 4px solid #10b981;
+      font-size: 14px;
     }
 
     img.questao-img {
       max-width: 100%;
       margin: 12px 0;
       border-radius: 8px;
-    }
-
-    .resposta {
-      margin-top: 12px;
-      padding: 10px;
-      background: #f3f4f6;
-      border-left: 4px solid #10b981;
-      font-size: 14px;
     }
   </style>
 </head>
@@ -102,8 +104,13 @@
       <span id="statusBadge"></span>
     </h2>
 
-    <p><strong>ID da Prova:</strong> <span id="provaId">—</span></p>
-    <p><strong>Duração:</strong> <span id="duracao">—</span> minutos</p>
+    <!-- METADADOS DA PROVA -->
+    <div class="meta">
+      <p><strong>ID da Prova:</strong> <span id="provaId">—</span></p>
+      <p><strong>Hash da Prova:</strong> <span id="hashProva">—</span></p>
+      <p><strong>Duração:</strong> <span id="duracao">—</span> minutos</p>
+      <p><strong>Total de Questões:</strong> <span id="totalQuestoes">—</span></p>
+    </div>
 
     <button id="btnPreview">Visualizar Prova</button>
 
@@ -113,6 +120,7 @@
   </div>
 
   <script>
+    // ===== 1. Contexto vindo da página 1 =====
     const raw = sessionStorage.getItem("prova_contexto");
 
     if (!raw) {
@@ -132,8 +140,11 @@
       throw new Error("JSON inválido");
     }
 
+    // ===== 2. Metadados =====
     document.getElementById("provaId").innerText = prova.prova_id || "—";
-    document.getElementById("duracao").innerText = prova.duracao_min || "—";
+    document.getElementById("hashProva").innerText = prova.hash_prova || "—";
+    document.getElementById("duracao").innerText = prova.duracao_min ?? "—";
+    document.getElementById("totalQuestoes").innerText = prova.total_questoes ?? "—";
 
     const badge = document.getElementById("statusBadge");
 
@@ -142,11 +153,12 @@
       badge.className = "badge badge-ativada";
     } else {
       document.getElementById("mensagemErro").innerText =
-        "Apenas provas ATIVADAS podem ser visualizadas.";
+        "Apenas provas com status ATIVADA podem ser visualizadas.";
       document.getElementById("btnPreview").disabled = true;
       throw new Error("Status inválido");
     }
 
+    // ===== 3. Preview da prova =====
     document.getElementById("btnPreview").addEventListener("click", async () => {
       const container = document.getElementById("provaContainer");
       container.innerHTML = "Carregando prova...";
@@ -174,25 +186,22 @@
             html += `<img src="${q.imagem_id}" class="questao-img">`;
           }
 
-          // Múltipla escolha
-          if (q.alternativas && q.alternativas.length > 0) {
-            html += "<ul class='alternativas'>";
+          if (q.alternativas?.length) {
+            html += "<ul>";
             q.alternativas.forEach((alt, i) => {
               html += `<li><strong>${letras[i]})</strong> ${alt}</li>`;
             });
             html += "</ul>";
           }
 
-          // Correlação
-          if (q.pares && q.pares.length > 0) {
-            html += "<ul class='pares'>";
+          if (q.pares?.length) {
+            html += "<ul>";
             q.pares.forEach(p => {
               html += `<li>${p.colunaA} ↔ ${p.colunaB}</li>`;
             });
             html += "</ul>";
           }
 
-          // Resposta / gabarito
           if (q.resposta) {
             html += `
               <div class="resposta">
