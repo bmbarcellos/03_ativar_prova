@@ -136,6 +136,12 @@
           return;
         }
 
+        // 🔒 AJUSTE MÍNIMO DE ATOMICIDADE
+        if (!Array.isArray(data) || !data[0]) {
+          alert("Resposta inválida do servidor.");
+          return;
+        }
+
         // Salva retorno do workflow 3 no storage
         sessionStorage.setItem("prova_contexto", JSON.stringify(data[0]));
 
