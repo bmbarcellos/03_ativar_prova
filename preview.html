@@ -134,7 +134,6 @@
       const response = await fetch(url);
       const data = await response.json();
 
-      // 🔹 Atualiza METADADOS com dados REAIS do webhook
       document.getElementById("hashProva").innerText = data.hash_prova || "—";
       document.getElementById("duracao").innerText = data.duracao_min ?? "—";
       document.getElementById("totalQuestoes").innerText = data.total_questoes ?? "—";
@@ -159,16 +158,28 @@
           html += "</ul>";
         }
 
-        // 🔹 Normalização da resposta
+        /* 🔹 CORREÇÃO DEFINITIVA DO GABARITO */
         if (q.resposta !== undefined && q.resposta !== null) {
-          let respostaFinal = "";
+          let respostaFinal = "—";
+          const r = q.resposta;
 
-          if (typeof q.resposta === "number" && q.resposta >= 1 && q.resposta <= 5) {
-            respostaFinal = letras[q.resposta - 1];
-          } else if (typeof q.resposta === "string" && letras.includes(q.resposta)) {
-            respostaFinal = q.resposta;
-          } else {
-            respostaFinal = q.resposta; // fallback seguro
+          // 0–4 (índice)
+          if (typeof r === "number" && r >= 0 && r <= 4) {
+            respostaFinal = letras[r];
+          }
+          // 1–5
+          else if (typeof r === "number" && r >= 1 && r <= 5) {
+            respostaFinal = letras[r - 1];
+          }
+          // "0"–"4" ou "1"–"5"
+          else if (!isNaN(r)) {
+            const n = Number(r);
+            if (n >= 0 && n <= 4) respostaFinal = letras[n];
+            else if (n >= 1 && n <= 5) respostaFinal = letras[n - 1];
+          }
+          // "A"–"E"
+          else if (typeof r === "string" && letras.includes(r.toUpperCase())) {
+            respostaFinal = r.toUpperCase();
           }
 
           html += `
