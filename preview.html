@@ -83,7 +83,8 @@
     }
 
     img.questao-img {
-      max-width: 100%;
+      max-width: 400px;
+      width: 100%;
       margin: 12px 0;
       border-radius: 8px;
     }
@@ -146,8 +147,9 @@
         let html = `<div class="questao"><h3>Questão ${index + 1}</h3>`;
         html += `<p>${q.enunciado}</p>`;
 
-        if (q.imagem_id) {
-          html += `<img src="${q.imagem_id}" class="questao-img">`;
+        /* 🔹 AJUSTE DE IMAGEM (imagem_link) */
+        if (q.imagem_link) {
+          html += `<img src="${q.imagem_link}" class="questao-img">`;
         }
 
         if (q.alternativas?.length) {
@@ -158,27 +160,19 @@
           html += "</ul>";
         }
 
-        /* 🔹 CORREÇÃO DEFINITIVA DO GABARITO */
         if (q.resposta !== undefined && q.resposta !== null) {
           let respostaFinal = "—";
           const r = q.resposta;
 
-          // 0–4 (índice)
           if (typeof r === "number" && r >= 0 && r <= 4) {
             respostaFinal = letras[r];
-          }
-          // 1–5
-          else if (typeof r === "number" && r >= 1 && r <= 5) {
+          } else if (typeof r === "number" && r >= 1 && r <= 5) {
             respostaFinal = letras[r - 1];
-          }
-          // "0"–"4" ou "1"–"5"
-          else if (!isNaN(r)) {
+          } else if (!isNaN(r)) {
             const n = Number(r);
             if (n >= 0 && n <= 4) respostaFinal = letras[n];
             else if (n >= 1 && n <= 5) respostaFinal = letras[n - 1];
-          }
-          // "A"–"E"
-          else if (typeof r === "string" && letras.includes(r.toUpperCase())) {
+          } else if (typeof r === "string" && letras.includes(r.toUpperCase())) {
             respostaFinal = r.toUpperCase();
           }
 
