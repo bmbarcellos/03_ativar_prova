@@ -83,8 +83,7 @@
     }
 
     img.questao-img {
-      max-width: 400px;
-      width: 100%;
+      max-width: 100%;
       margin: 12px 0;
       border-radius: 8px;
     }
@@ -147,9 +146,8 @@
         let html = `<div class="questao"><h3>Questão ${index + 1}</h3>`;
         html += `<p>${q.enunciado}</p>`;
 
-        // 🔹 IMAGEM via imagem_link (GitHub-friendly)
-        if (q.imagem_link) {
-          html += `<img src="${q.imagem_link}" class="questao-img" alt="Imagem da questão">`;
+        if (q.imagem_id) {
+          html += `<img src="${q.imagem_id}" class="questao-img">`;
         }
 
         let respostaLetra = "";
